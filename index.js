@@ -1,4 +1,12 @@
 const { Client, GatewayIntentBits } = require('discord.js');
+const http = require('http');
+
+// Uyanık tutma servisi (Render'ın botu kapatmaması için)
+http.createServer((req, res) => {
+  res.write("Bot aktif!");
+  res.end();
+}).listen(8080);
+
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds, 
@@ -7,30 +15,18 @@ const client = new Client({
     ] 
 });
 
-// Basit bir veritabanı (İsimler buraya eklenecek)
-const doluOyuncular = ["icardi", "osimehn", "ferdi"];
+client.once('ready', () => {
+    console.log(`${client.user.tag} olarak giriş yapıldı!`);
+});
 
 client.on('messageCreate', (message) => {
-    // Botun kendi mesajlarına cevap vermesini engelle
     if (message.author.bot) return;
 
-    // .ara komutunu kontrol et
     if (message.content.startsWith('.ara')) {
-        // .ara kısmından sonraki ismi al (.ara icardi -> icardi)
         const args = message.content.split(' ').slice(1).join(' ');
+        if (!args) return message.reply('Bir isim yazmalısın.');
         
-        if (!args) {
-            return message.reply('Lütfen bir isim yaz! Örnek: `.ara icardi`');
-        }
-
-        // İsmi küçük harfe çevirerek veritabanında ara
-        const arananIsim = args.toLowerCase();
-        
-        if (doluOyuncular.includes(arananIsim)) {
-            message.reply(`🔴 **${args}** şu an bir takımda, yani DOLU!`);
-        } else {
-            message.reply(`🟢 **${args}** şu an boşta, alınabilir.`);
-        }
+        message.reply(`Aranan oyuncu: ${args} durumu kontrol ediliyor...`);
     }
 });
 
